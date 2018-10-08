@@ -1,0 +1,23 @@
+version: '3.7'
+
+services:
+  postgresql:
+    image: postgres:alpine
+    environment:
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+    networks:
+      net:
+        aliases:
+          - db
+    volumes:
+      - vol:/var/lib/postgresql/data
+
+networks:
+  net:
+    name: tajinaste-net
+
+volumes:
+  vol:
+    name: postgresql-vol
