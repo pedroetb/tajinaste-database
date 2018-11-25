@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS auth.users (
 	id smallserial PRIMARY KEY,
 	uuid uuid UNIQUE NOT NULL DEFAULT uuid_generate_v4(),
 	email text UNIQUE NOT NULL CHECK(email ~* '^.+@.+\..+$'),
-	password text NOT NULL CHECK(length(password) < 128),
+	password text NOT NULL,
 	role text NOT NULL CHECK(length(role) < 64),
 	name text NOT NULL,
 	photo uuid,
@@ -54,7 +54,7 @@ CREATE OR REPLACE FUNCTION
 auth.get_user_data(email text, password text) RETURNS text AS $$
 BEGIN
 	RETURN (
-		SELECT role
+		SELECT role AS user_role
 		FROM auth.users
 		WHERE users.email = get_user_data.email
 		AND users.password = crypt(get_user_data.password, users.password)
