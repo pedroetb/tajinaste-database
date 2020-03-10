@@ -1,35 +1,44 @@
 version: '3.7'
 
 services:
-  postgresql:
-    image: postgres:${IMAGE_TAG:-10.5-alpine}
+  tajinaste-database:
+    image: ${IMAGE_NAME:-postgres}:${IMAGE_TAG:-10.5-alpine}
     environment:
-      - POSTGRES_DB
-      - POSTGRES_USER
-      - POSTGRES_PASSWORD
+      POSTGRES_DB:
+      POSTGRES_USER:
+      POSTGRES_PASSWORD:
     networks:
-      net:
+      tajinaste-net:
         aliases:
-          - db
+          - ${TAJINASTE_NET_ALIAS:-db}
     volumes:
-      - vol:/var/lib/postgresql/data
+      - data-vol:/var/lib/postgresql/data
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: ${REPLICAS:-1}
       restart_policy:
-        delay: 10s
-        window: 1m
+        delay: ${RESTART_DELAY:-10s}
+      update_config:
+        delay: ${UPDATE_DELAY:-1m}
       resources:
         limits:
-          cpus: '2'
-          memory: 128M
+          cpus: '${RESOURCES_LIMITS_CPUS:-1}'
+          memory: ${RESOURCES_LIMITS_MEMORY:-64M}
         reservations:
-          memory: 103M
+          cpus: '${RESOURCES_RESERVATIONS_CPUS:-0.001}'
+          memory: ${RESOURCES_RESERVATIONS_MEMORY:-16M}
 
 networks:
-  net:
-    name: tajinaste-net
+  tajinaste-net:
+    name: ${TAJINASTE_NET_NAME:-tajinaste-net}
+    driver: ${TAJINASTE_NET_DRIVER:-overlay}
+    attachable: ${TAJINASTE_NET_ATTACHABLE:-true}
 
 volumes:
-  vol:
-    name: ${VOLUME_NAME:-postgresql-vol}
+  data-vol:
+    name: ${DATA_VOL_NAME:-tajinaste-database-vol}
+    driver: ${DATA_VOL_DRIVER:-local}
+    driver_opts:
+      type: ${DATA_VOL_TYPE:-nfs4}
+      o: ${DATA_VOL_OPTIONS}
+      device: ${DATA_VOL_DEVICE:-:/tajinaste-database-vol/}
